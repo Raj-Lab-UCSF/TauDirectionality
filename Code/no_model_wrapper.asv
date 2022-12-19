@@ -1,0 +1,11 @@
+%% 0. Loading data
+matdir = '/Users/justintorok/Documents/MATLAB/TauDirectionality_ChrisPaper_Project/TauDirectionality/raw_data_mouse';
+load([matdir filesep 'eNDM_mousedata.mat'],'Networks','tpts','netlabs','data426','seed426');
+C_ret = Networks.ret; C_ant = Networks.ant; C_nd = Networks.nd;
+taudata_struct = struct;
+tpts_struct = struct;
+labnms_struct = struct;
+
+for i = 1:length(labnms)
+    taudata_struct.(labnms{i})
+end
