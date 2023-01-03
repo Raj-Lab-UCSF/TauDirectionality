@@ -115,7 +115,56 @@ title('Conn. to Seed vs. IbaHippInj');
 set(gca,'FontSize',16);
 
 %% 4. S vs. Aggregation
-% load([cd filesep 'SampleFiles' filesep 'beta_gamma_curve_finerange.mat']);
+load([cd filesep 'aggregation_bias_struct.mat']);
+svals_pde = aggregation_bias_struct.PDE.svals;
+aggrate_pde = aggregation_bias_struct.PDE.gbratio;
+logisticfxn = @(params,x) params(4) + (params(3)*ones(1,length(x))) ./ ...
+    (1 + exp(-params(1)*(log10(x) - params(2))));
+resfxn = @(params) sum(abs(svals_pde - logisticfxn(params,aggrate_pde)));
+% ub = [Inf;Inf]; lb = [0;-Inf];
+logistic_opt = fmincon(resfxn,[1;1;1;0]);
+
+svals_dnt_adl = [];
+for i = 1:length(aggregation_bias_struct.DNT.adl_names)
+    svals = aggregation_bias_struct.DNT.svals_adl{i};
+    svals = svals(~isnan(svals));
+    svals_dnt_adl = [svals_dnt_adl,svals];
+end
+aggrate_dnt_adl = zeros(1,length(svals_dnt_adl));
+for i = 1:length(aggrate_dnt_adl)
+    resfxn_i = @(x) abs(svals_dnt_adl(i) - logisticfxn(logistic_opt,x));
+    x0 = (aggrate_pde(end) - aggrate_pde(1))/2; 
+    lb = aggrate_pde(1); ub = aggrate_pde(end);
+    aggrate_dnt_adl(i) = fmincon(resfxn_i,x0,[],[],[],[],lb,ub);
+end
+
+svals_dnt_nadl = [];
+for i = 1:length(aggregation_bias_struct.DNT.nadl_names)
+    svals = aggregation_bias_struct.DNT.svals_nadl{i};
+    svals = svals(~isnan(svals));
+    svals_dnt_nadl = [svals_dnt_nadl,svals];
+end
+aggrate_dnt_nadl = zeros(1,length(svals_dnt_nadl));
+for i = 1:length(aggrate_dnt_nadl)
+    resfxn_i = @(x) abs(svals_dnt_nadl(i) - logisticfxn(logistic_opt,x));
+    x0 = (aggrate_pde(end) - aggrate_pde(1))/2; 
+    lb = aggrate_pde(1); ub = aggrate_pde(end);
+    aggrate_dnt_nadl(i) = fmincon(resfxn_i,x0,[],[],[],[],lb,ub);
+end
+
+figure; hold on;
+% scatter(aggrate_pde,svals_pde,'filled');
+cmap = lines(2);
+xrange = linspace(min(aggrate_pde), max(aggrate_pde));
+plot(logisticfxn(logistic_opt,xrange),xrange,'k--','LineWidth',2);
+scatter(svals_dnt_adl,aggrate_dnt_adl,50,'o','filled',...
+    'MarkerEdgeColor',cmap(1,:),'MarkerFaceColor',cmap(1,:));
+scatter(svals_dnt_nadl,aggrate_dnt_nadl,30,'s','filled',...
+    'MarkerEdgeColor',cmap(2,:),'MarkerFaceColor',cmap(2,:));
+legend({'PDE','ADL','NADL'},'Location','northwest');
+xlabel('Agg. Rate'); ylabel('s');
+set(gca,'FontSize',16,'yscale','log');
+
 % figure('Units','inches','Position',[0 0 10 9]); hold on;
 % cmap = hsv(size(biasmat,2));
 % smat = 0.5 - 0.5*biasmat;
