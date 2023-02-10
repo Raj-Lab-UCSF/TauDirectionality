@@ -236,15 +236,15 @@ view([0 0 1])
 
 %% 4. Figure 2, model for IbaHippInj
 bvec = 0:0.05:1;
-tvec = 0:0.5:tpts_all.IbaStrInj(end);
-tinds = find(ismember(tvec,[0,tpts_all.IbaStrInj]));
-pathology_iba = log(taudata_all.IbaStrInj+1);
-seed_iba = seed_all.IbaStrInj;
+tvec = 0:0.5:tpts_all.IbaHippInj(end);
+tinds = find(ismember(tvec,[0,tpts_all.IbaHippInj]));
+pathology_iba = log(taudata_all.IbaHippInj+1);
+seed_iba = seed_all.IbaHippInj;
 pathwseed = [seed_iba, pathology_iba];
 
 % pathwseed = [pathology_iba];
 rate_iba = (pathwseed(:,2:end) - pathwseed(:,1:end-1))./...
-    (tpts_all.IbaStrInj - [0,tpts_all.IbaStrInj(1:end-1)]);
+    (tpts_all.IbaHippInj - [0,tpts_all.IbaHippInj(1:end-1)]);
 % rate_iba = (pathwseed(:,2:end) - pathwseed(:,1:end-1))./...
 %     (tpts_all.IbaHippInj(2:end) - tpts_all.IbaHippInj(1:end-1));
 model_ant_mat = zeros(length(seed_iba),length(tvec),length(bvec));
@@ -260,13 +260,13 @@ for i = 1:length(bvec)
     Rvals_ant(i) = corr(Xi_ant(:,end),pathology_iba(:,end),'rows','complete');
     Rvals_ant_rate(i) = corr(Xi_ant_rate(:,end),rate_iba(:,end),'rows','complete');
     model_ant_mat(:,:,i) = Xi_ant;
-    Xi_ret = log(spreadModel(seed_iba,tvec,L_ret,bvec(i))+1);
+    Xi_ret = log(spreadModel(seed_iba,tvec,L_ret,bvec(i));
     Xi_ret_rate = (Xi_ret(:,tinds(2:end)) - Xi_ret(:,tinds(1:end-1))) ./ ...
         (tvec(tinds(2:end)) - tvec(tinds(1:end-1)));
     Rvals_ret(i) = corr(Xi_ret(:,end),pathology_iba(:,end),'rows','complete');
     Rvals_ret_rate(i) = corr(Xi_ret_rate(:,end),rate_iba(:,end),'rows','complete');
     model_ret_mat(:,:,i) = Xi_ret;
-    Xi_nd = log(spreadModel(seed_iba,tvec,(L_ret+L_ant)/2,bvec(i))+1);
+    Xi_nd = spreadModel(seed_iba,tvec,(L_ret+L_ant)/2,bvec(i));
     Xi_nd_rate = (Xi_nd(:,tinds(2:end)) - Xi_nd(:,tinds(1:end-1))) ./ ...
         (tvec(tinds(2:end)) - tvec(tinds(1:end-1)));
     Rvals_nd(i) = corr(Xi_nd(:,end),pathology_iba(:,end),'rows','complete');
